@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASS:-password}
+      POSTGRES_DB: ${DB_NAME:-mydb}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-user} -d ${DB_NAME:-mydb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  fastapi:
+    build: ./fastapi_postgres
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-user}:${DB_PASS:-password}@db:5432/${DB_NAME:-mydb}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  flask:
+    build: ./flask_server
+    environment:
+      API_INTERNAL_URL: http://fastapi:8000
+      ML_ANALYTICS_URL: http://analytics:8080
+    ports:
+      - "5000:5000"
+    depends_on:
+      - fastapi
+
+  analytics:
+    build: ./ml_dashboards
+    environment:
+      PETCARE_API_URL: http://fastapi:8000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - fastapi
+
+volumes:
+  postgres_data:

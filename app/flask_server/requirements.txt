@@ -1,0 +1,10 @@
+flask
+flask-cors
+requests
+ultralytics
+open-clip-torch
+torch
+torchvision
+pillow
+numpy
+opencv-python-headless

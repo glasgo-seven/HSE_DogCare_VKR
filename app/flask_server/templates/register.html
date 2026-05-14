@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>PetCare — регистрация владельца и питомца</title>
+
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: 'Segoe UI', system-ui, sans-serif;
+			margin: 0;
+			background: #f5f7fa;
+			color: #333;
+		}
+
+		header {
+			background: #fff;
+			padding: 16px 24px;
+			box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			flex-wrap: wrap;
+			gap: 12px;
+		}
+
+		h1 {
+			font-size: 1.2rem;
+			margin: 0;
+		}
+
+		main {
+			max-width: 720px;
+			margin: 0 auto;
+			padding: 24px 16px 48px;
+		}
+
+		.panel {
+			background: #fff;
+			border-radius: 12px;
+			padding: 20px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+			margin-bottom: 16px;
+		}
+
+		.panel h2 {
+			font-size: 1rem;
+			margin: 0 0 12px;
+			color: #444;
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+		}
+
+		@media (max-width: 640px) {
+			.grid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		label {
+			display: flex;
+			flex-direction: column;
+			font-size: 12px;
+			color: #555;
+			gap: 4px;
+		}
+
+		input,
+		select {
+			padding: 8px 10px;
+			border: 1px solid #ccc;
+			border-radius: 8px;
+			font-size: 14px;
+		}
+
+		input[type="file"] {
+			padding: 6px;
+		}
+
+		.actions {
+			margin-top: 16px;
+			display: flex;
+			gap: 12px;
+			flex-wrap: wrap;
+			align-items: center;
+		}
+
+		button.primary {
+			background: #ff8c6b;
+			color: #fff;
+			border: none;
+			padding: 10px 22px;
+			border-radius: 10px;
+			font-size: 15px;
+			cursor: pointer;
+		}
+
+		button.primary:disabled {
+			opacity: .55;
+			cursor: not-allowed;
+		}
+
+		.msg {
+			font-size: 14px;
+			margin-top: 8px;
+		}
+
+		.msg.err {
+			color: #c00;
+		}
+
+		.msg.ok {
+			color: #0a7;
+		}
+
+		a {
+			color: #2563eb;
+		}
+
+		#success {
+			display: none;
+		}
+
+		.rec-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.rec-list li {
+			padding: 10px 12px;
+			border: 1px solid #eee;
+			border-radius: 8px;
+			margin-bottom: 8px;
+			background: #fafbfc;
+		}
+
+		.rec-meta {
+			font-size: 12px;
+			color: #666;
+			margin-top: 4px;
+		}
+
+		.hint {
+			font-size: 12px;
+			color: #555;
+			line-height: 1.45;
+			margin-top: 6px;
+			max-width: 640px;
+		}
+
+		#preview-row {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-top: 8px;
+		}
+
+		#preview-row img {
+			max-width: 100px;
+			max-height: 100px;
+			border-radius: 8px;
+			object-fit: cover;
+		}
+	</style>
+</head>
+
+<body>
+	<header>
+		<h1>Регистрация</h1>
+		<div><a href="/">На главную</a> · <a href="/login">Вход</a></div>
+	</header>
+	<main>
+		<!-- <p class="msg">Данные сохраняются в базе через API. Фото при регистрации не хранятся — по ним создаётся только DogID (вектор для камер). После отправки покажем услуги, популярные у похожих клиентов (дашборд association).</p> -->
+
+		<form id="reg-form">
+			<div class="panel">
+				<h2>Владелец</h2>
+				<div class="grid">
+					<label>Имя и фамилия *<input name="owner_name" required autocomplete="name" /></label>
+					<label>Email *<input name="owner_email" type="email" required autocomplete="email" /></label>
+					<label>Телефон<input name="owner_phone" type="tel" autocomplete="tel" placeholder="+7…" /></label>
+					<label>Регион / город<input name="owner_region" placeholder="Москва" /></label>
+					<label>Возраст<input name="owner_age" type="number" min="1" max="120" /></label>
+					<label>Пол<select name="owner_gender">
+							<option value="">Не указано</option>
+							<option value="false">Женский</option>
+							<option value="true">Мужской</option>
+						</select></label>
+				</div>
+			</div>
+
+			<div class="panel">
+				<h2>Питомец</h2>
+				<div class="grid">
+					<label>Кличка *<input name="dog_name" required /></label>
+					<label>Порода *<select name="breed_id" id="breed_id" required>
+							<option value="">Загрузка…</option>
+						</select></label>
+					<label>Возраст (лет)<input name="dog_age" type="number" min="0" max="30" /></label>
+					<label>Пол<select name="dog_gender">
+							<option value="">Не указано</option>
+							<option value="false">Сука</option>
+							<option value="true">Кобель</option>
+						</select></label>
+					<label style="grid-column: 1 / -1;">Фото питомца (необязательно, можно несколько)
+						<input name="photos" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif"
+							id="photos" />
+						<span class="hint">
+							Если загрузите снимки, по ним будет сформирован <strong>DogID</strong> для поиска вашего питомца на камерах: чем больше фото с разных ракурсов и при разном свете, тем точнее распознавание. Сами файлы на сервере <strong>не хранятся</strong> — сохраняются только вычисленные метаданные (вектор-признак).
+						</span>
+						<div id="preview-row"></div>
+					</label>
+				</div>
+			</div>
+			<div class="actions">
+				<button type="submit" class="primary" id="submit-btn">Зарегистрироваться</button>
+				<span id="form-msg" class="msg"></span>
+			</div>
+		</form>
+
+		<div id="success" class="panel">
+			<h2>Готово</h2>
+			<p id="success-summary"></p>
+			<p><strong>Рекомендуемые услуги</strong> для профилей, похожих на ваш (данные дашборда association):</p>
+			<ul id="rec-ul" class="rec-list"></ul>
+			<p id="rec-warn" class="msg err" style="display:none;"></p>
+			<p style="margin-top:16px;"><a href="/register">Зарегистрировать ещё одного</a></p>
+		</div>
+	</main>
+	
+	<script>
+		const PREFIX = "{{ api_proxy_prefix }}".replace(/\/$/, "");
+
+		async function loadBreeds() {
+			const sel = document.getElementById("breed_id");
+			try {
+				const res = await fetch(PREFIX + "/breeds/");
+				const data = await res.json();
+				if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : res.status);
+				sel.innerHTML = '<option value="">Выберите породу</option>' +
+					data.map((b) => `<option value="${b.id}">${escapeHtml(b.name)}</option>`).join("");
+			} catch (e) {
+				sel.innerHTML = '<option value="">Ошибка загрузки пород</option>';
+				console.error(e);
+			}
+		}
+
+		function escapeHtml(s) {
+			return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+		}
+
+		document.getElementById("photos").addEventListener("change", (ev) => {
+			const row = document.getElementById("preview-row");
+			row.innerHTML = "";
+			const files = ev.target.files;
+			if (!files || !files.length) return;
+			const n = Math.min(files.length, 8);
+			for (let i = 0; i < n; i++) {
+				const url = URL.createObjectURL(files[i]);
+				const img = document.createElement("img");
+				img.src = url;
+				img.alt = "";
+				row.appendChild(img);
+			}
+		});
+
+		document.getElementById("reg-form").addEventListener("submit", async (e) => {
+			e.preventDefault();
+			const btn = document.getElementById("submit-btn");
+			const msg = document.getElementById("form-msg");
+			msg.textContent = "";
+			msg.className = "msg";
+			btn.disabled = true;
+			const fd = new FormData(e.target);
+			try {
+				const res = await fetch("/api/register", { method: "POST", body: fd });
+				const data = await res.json().catch(() => ({}));
+				if (!res.ok) {
+					const d = data.detail;
+					msg.textContent = typeof d === "string" ? d : (d ? JSON.stringify(d) : "Ошибка " + res.status);
+					msg.className = "msg err";
+					btn.disabled = false;
+					return;
+				}
+				document.getElementById("reg-form").style.display = "none";
+				document.getElementById("success").style.display = "block";
+				const o = data.owner || {};
+				const d = data.dog || {};
+				document.getElementById("success-summary").innerHTML =
+					`Владелец: <strong>${escapeHtml(o.name)}</strong> (id ${o.id})<br/>` +
+					`Питомец: <strong>${escapeHtml(d.name)}</strong>, порода ${escapeHtml(d.breed || "")}` +
+					(data.dog_embedding
+						? `<br/>DogID сохранён в <strong>dog_embeddings</strong> по <strong>${data.dog_embedding.source_photo_count}</strong> фото (размерность вектора ${data.dog_embedding.embedding_dim}).`
+						: "");
+				const ul = document.getElementById("rec-ul");
+				const recs = data.service_recommendations || [];
+				if (recs.length === 0) {
+					ul.innerHTML = "<li>Пока нет устойчивых правил для выбранного профиля — загляните позже или посмотрите общую <a href=\"/analytics\">аналитику</a>.</li>";
+				} else {
+					ul.innerHTML = recs.map((r) =>
+						`<li><strong>${escapeHtml(r.service)}</strong>` +
+						`<div class="rec-meta">уверенность ${r.confidence}, lift ${r.lift}, support ${r.support}</div></li>`
+					).join("");
+				}
+				const w = document.getElementById("rec-warn");
+				if (data.recommendations_warning) {
+					w.style.display = "block";
+					w.textContent = data.recommendations_warning;
+				}
+			} catch (err) {
+				msg.textContent = String(err.message || err);
+				msg.className = "msg err";
+			}
+			btn.disabled = false;
+		});
+
+		loadBreeds();
+	</script>
+</body>
+
+</html>
