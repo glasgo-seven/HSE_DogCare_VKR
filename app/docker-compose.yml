@@ -27,15 +27,15 @@ services:
       db:
         condition: service_healthy
 
-  flask:
-    build: ./flask_server
-    environment:
-      API_INTERNAL_URL: http://fastapi:8000
-      ML_ANALYTICS_URL: http://analytics:8080
-    ports:
-      - "5000:5000"
-    depends_on:
-      - fastapi
+  # flask:
+  #   build: ./flask_server
+  #   environment:
+  #     API_INTERNAL_URL: http://fastapi:8000
+  #     ML_ANALYTICS_URL: http://analytics:8080
+  #   ports:
+  #     - "5000:5000"
+  #   depends_on:
+  #     - fastapi
 
   analytics:
     build: ./ml_dashboards
