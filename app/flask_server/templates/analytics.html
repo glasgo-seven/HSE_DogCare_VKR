@@ -459,7 +459,7 @@
 				months.forEach((m) => {
 					const v = rows[b][m] || 0;
 					const inten = maxv ? Math.round(200 + 55 * (v / maxv)) : 255;
-					const bg = "rgb(255," + (280 - inten) + "," + (240 - v * 3) + ")";
+					const bg = "rgb(255," + (255 - v * 32) + "," + (255 - v * 32) + ")";
 					html += "<td style='background:" + bg + "'>" + (v || "") + "</td>";
 				});
 				html += "</tr>";

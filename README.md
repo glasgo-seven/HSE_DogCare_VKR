@@ -1,5 +1,6 @@
 # HSE_DogCare_VKR
-"Автоматизации услуг детского сада для собак методами машинного обученияAutomation of Dog Daycare Services Using Machine Learning Methods"
+"Автоматизации услуг детского сада для собак методами машинного обучения"<br>
+"Automation of Dog Daycare Services Using Machine Learning Methods"
 
 ## Запуск
 ### Докер
@@ -13,3 +14,10 @@ dbAPI: `http://127.0.0.1:8000/`
 
 web-app: `http://127.0.0.1:5000/`
 
+### Пример .env
+```ini
+# Database Configuration
+DB_USER=postgres
+DB_PASS=postgres
+DB_NAME=animal_care_db
+```
